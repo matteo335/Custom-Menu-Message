@@ -1,0 +1,59 @@
+plugins {
+    id "eclipse"
+    id "net.minecraftforge.gradle" version "[6.0,6.2)"
+    id "org.parchmentmc.librarian.forgegradle" version "1+"
+    id "org.spongepowered.mixin" version "0.7.+"
+}
+
+base {
+    archivesName = "${mod_id}_${minecraft_version}_${mod_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+
+    runs {
+        configureEach {
+            workingDirectory project.file("run")
+            property "forge.logging.console.level", "debug"
+            property "fml.earlyprogresswindow", "false"
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            taskName "client"
+            property "forge.enabledGameTestNamespaces", mod_id
+        }
+
+        server {
+            taskName "server"
+            property "forge.enabledGameTestNamespace", mod_id
+        }
+    }
+
+    sourceSets.main.resources { srcDir "src/generated/resources" }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation fg.deobf("curse.maven:ice-and-fire-dragons-264231:5633453")
+    implementation fg.deobf("curse.maven:citadel-331936:6702068")
+    implementation fg.deobf("curse.maven:ice-and-fire-patcher-1066111:6940339")
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, "mixins.CustomMenuMessage.refmap.json"
+    config "mixins.custom_menu_message_vanilla.json"
+    config "mixins.custom_menu_message_iceandfire.json"
+}
+
+repositories { maven { url = "https://cursemaven.com"} }
